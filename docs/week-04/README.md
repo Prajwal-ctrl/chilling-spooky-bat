@@ -82,19 +82,28 @@ During implementation:
 6. Prove the fix with tests and experiments.
 7. Record an ADR or experiment report when a meaningful design decision or finding is made.
 
-## Concept notes
+## Recommended study order
 
-- [Concurrency fundamentals](concurrency.md)
-- [Race conditions](race-conditions.md)
-- [Lost updates](lost-updates.md)
-- [PostgreSQL MVCC](mvcc.md)
-- [Transaction isolation](transaction-isolation.md)
-- [Pessimistic locking](pessimistic-locking.md)
-- [Optimistic locking](optimistic-locking.md)
-- [Deadlocks and lock ordering](deadlocks.md)
-- [Spring transactions](spring-transactions.md)
-- [Concurrency testing](concurrency-testing.md)
-- [My understanding and learning journal](my-understanding.md)
+Read the concept files in numerical order. The order follows the problem-solving story: first understand why concurrent work exists, then see how it creates correctness bugs, understand what the database guarantees, and finally study the available ways to coordinate writes.
+
+| Order | File | Why it comes here |
+|---:|---|---|
+| 1 | [Concurrency fundamentals](01-concurrency-fundamentals.md) | Start with overlapping operations and why concurrency is normal. |
+| 2 | [Race conditions](02-race-conditions.md) | Learn when timing and execution order can make a result incorrect. |
+| 3 | [Lost updates](03-lost-updates.md) | Study a concrete payment-balance bug caused by a race condition. |
+| 4 | [Spring transactions](04-spring-transactions.md) | Understand the all-or-nothing boundary for debit, credit, and payment records—and why a transaction alone does not coordinate every concurrent update. |
+| 5 | [PostgreSQL MVCC](05-postgresql-mvcc.md) | Understand how readers can see committed row versions while another transaction is writing. |
+| 6 | [Transaction isolation](06-transaction-isolation.md) | Learn how snapshots and isolation levels affect what each transaction can observe. |
+| 7 | [Pessimistic locking](07-pessimistic-locking.md) | Study the first explicit write-coordination solution: lock the account row before changing it. |
+| 8 | [Deadlocks and lock ordering](08-deadlocks-and-lock-ordering.md) | Understand a new problem that can arise when transactions hold multiple locks, and how consistent ordering reduces avoidable deadlocks. |
+| 9 | [Optimistic locking](09-optimistic-locking.md) | Compare a different strategy based on version checks. It is not automatically a better form of pessimistic locking; it can be preferable when conflicts are relatively uncommon. |
+| 10 | [Concurrency testing](10-concurrency-testing.md) | Reproduce the bug, test the fix, and prove that financial invariants hold. |
+
+**Mental model:** problem → concrete failure → transaction and database behavior → explicit locking solution → lock-management complication → alternative strategy → tests.
+
+### Other learning notes
+
+- [My understanding and learning journal](my-understanding.md) — original explanations, corrections, and personal revision notes.
 
 ## Status
 
