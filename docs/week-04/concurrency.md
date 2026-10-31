@@ -32,3 +32,28 @@ PAY-006 requires safe processing of simultaneous transfers while maintaining bal
 ## Experiments
 
 To be added during the implementation week.
+
+---
+
+## My understanding (simple English)
+
+Concurrency means **more than one task is in progress during the same period of time**. The tasks do not always need to run at the exact same instant. The system may switch between them, or different CPU cores may run them in parallel.
+
+Think about a payment application. Alice starts sending money to Bob, while Charlie starts sending money to David. Both transfers can be processed around the same time. That is normal concurrency.
+
+Concurrency itself is not a problem. The problem starts when two operations use or change the same data and the result becomes incorrect because of their timing.
+
+### Example
+
+Alice has ₹10,000. Two payment requests try to debit her account:
+
+- T1 wants to debit ₹4,000.
+- T2 wants to debit ₹3,000.
+
+Both requests may run at the same time. Our system must make sure that the final balance is correct and that Alice does not go below her minimum balance.
+
+### Easy way to remember
+
+- **Concurrency:** multiple tasks are in progress during overlapping time.
+- **Parallelism:** multiple tasks are actually executing at the same instant.
+- Concurrency is expected in a payment system. We need to design it safely.
