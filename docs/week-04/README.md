@@ -94,6 +94,7 @@ During implementation:
 - [Deadlocks and lock ordering](deadlocks.md)
 - [Spring transactions](spring-transactions.md)
 - [Concurrency testing](concurrency-testing.md)
+- [My understanding and learning journal](my-understanding.md)
 
 ## Status
 
