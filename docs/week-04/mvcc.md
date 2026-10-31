@@ -31,3 +31,35 @@ MVCC controls which row versions are visible to a transaction. It does not by it
 3. What does a new T2 statement see after T1 commits under READ COMMITTED?
 4. How does REPEATABLE READ differ?
 5. Why is MVCC not a substitute for a deliberate write-coordination strategy?
+
+---
+
+## My understanding (simple English)
+
+MVCC means **Multi-Version Concurrency Control**. PostgreSQL keeps information about different versions of a row so that a normal reader can see a committed version while another transaction is changing that row.
+
+The important point I learned is that a normal SELECT and a SELECT FOR UPDATE behave differently.
+
+### Example
+
+Alice's committed balance is ₹10,000.
+
+1. T1 starts and locks Alice's row using SELECT ... FOR UPDATE.
+2. T1 changes the balance to ₹6,000, but has not committed yet.
+3. T2 runs a normal SELECT. It normally does not wait for T1's row lock. It can read the previously committed balance: ₹10,000.
+4. T1 commits the ₹6,000 balance.
+5. T2 runs a **new SELECT statement**. Under READ COMMITTED, this new statement can now see ₹6,000.
+
+T2 cannot see T1's uncommitted ₹6,000 change.
+
+### Important difference
+
+- Normal SELECT: reads a visible committed version and normally does not wait for this row lock.
+- SELECT ... FOR UPDATE: asks for a row lock, so it normally waits for a conflicting lock.
+- A conflicting UPDATE: normally waits for the other transaction's row lock.
+
+### Easy way to remember
+
+**MVCC helps readers see a safe committed version of data without having to wait for every writer.** Under READ COMMITTED, a later statement can see a change after it has been committed.
+
+The correct name is MVCC — Multi-Version Concurrency Control.
