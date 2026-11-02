@@ -59,21 +59,23 @@ Both requests may run at the same time. Our system must make sure that the final
 - Concurrency is expected in a payment system. We need to design it safely.
 
 
-## Learning checkpoint — 2 November 2026
+## My understanding (my teach-back) — 2 November 2026
 
-<mark>Conceptual teach-back completed; continue to race conditions.</mark>
+Concurrency means multiple requests are being processed during overlapping periods. The tasks do not have to execute at the exact same instant. One task can execute while another is waiting, and while one task is waiting, the system can execute another task.
 
-### Learner's mental model
+Parallelism means multiple tasks can execute at the same instant on different CPU cores. They can execute inside the same Spring Boot application instance (the same JVM); we do not need to run multiple application instances to get parallel execution. With one CPU core, tasks can make progress concurrently through switching, but that core does not execute instructions from two tasks at the exact same instant.
 
-- **Concurrency:** multiple requests/tasks make progress during overlapping periods. One CPU core can switch between tasks; they do not need to execute at the same instant.
-- **Parallelism:** multiple tasks execute at the same instant on different execution resources, such as CPU cores. One Spring Boot JVM instance can use multiple cores.
-- **Resource contention:** multiple tasks compete for a shared resource, such as conflicting locks on an account row or a Java synchronized object.
+Contention can still happen when the application has four CPU cores. For example, two requests running on different cores may try to update the same account row in the database. They are competing for access to the same shared resource, and one transaction may have to wait if it needs a conflicting lock.
 
-### Payment-service example
+### My example: one Spring Boot instance on four CPU cores
 
-A Spring Boot application running as one JVM on a four-core machine can process requests concurrently and may execute runnable request-handling tasks in parallel on different cores. Two transactions can also contend when they request conflicting access to the same account row.
+- The application can process multiple requests concurrently.
+- It can execute runnable request-handling tasks in parallel on different CPU cores.
+- Contention is still possible when two transactions compete for the same account row.
 
-Remember that contention is not the definition of parallelism. It is about competing for a shared resource. Also, ordinary PostgreSQL reads of the same row do not automatically require a row lock.
+### Recall in my words
+
+Concurrency is multiple requests making progress during overlapping time. Parallelism is multiple tasks executing at the same instant on different CPU cores. Contention is when tasks compete for the same shared resource.
 
 ### Checkpoint status
 
