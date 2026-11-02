@@ -57,3 +57,28 @@ Both requests may run at the same time. Our system must make sure that the final
 - **Concurrency:** multiple tasks are in progress during overlapping time.
 - **Parallelism:** multiple tasks are actually executing at the same instant.
 - Concurrency is expected in a payment system. We need to design it safely.
+
+
+## Learning checkpoint — 2 November 2026
+
+<mark>Conceptual teach-back completed; continue to race conditions.</mark>
+
+### Learner's mental model
+
+- **Concurrency:** multiple requests/tasks make progress during overlapping periods. One CPU core can switch between tasks; they do not need to execute at the same instant.
+- **Parallelism:** multiple tasks execute at the same instant on different execution resources, such as CPU cores. One Spring Boot JVM instance can use multiple cores.
+- **Resource contention:** multiple tasks compete for a shared resource, such as conflicting locks on an account row or a Java synchronized object.
+
+### Payment-service example
+
+A Spring Boot application running as one JVM on a four-core machine can process requests concurrently and may execute runnable request-handling tasks in parallel on different cores. Two transactions can also contend when they request conflicting access to the same account row.
+
+Remember that contention is not the definition of parallelism. It is about competing for a shared resource. Also, ordinary PostgreSQL reads of the same row do not automatically require a row lock.
+
+### Checkpoint status
+
+- [x] Explain concurrency with task switching.
+- [x] Distinguish concurrency from parallel execution.
+- [x] Explain that one JVM can use multiple CPU cores.
+- [x] Identify shared-resource contention in a payment scenario.
+- [ ] Next: study race conditions and unsafe interleavings.
