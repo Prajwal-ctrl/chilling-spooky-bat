@@ -92,6 +92,7 @@ Read the concept files in numerical order. The order follows the problem-solving
 | 2 | [Race conditions](02-race-conditions.md) | Learn when timing and execution order can make a result incorrect. |
 | 3 | [Lost updates](03-lost-updates.md) | Study a concrete payment-balance bug caused by a race condition. |
 | 4 | [Spring transactions](04-spring-transactions.md) | Understand the all-or-nothing boundary for debit, credit, and payment records—and why a transaction alone does not coordinate every concurrent update. |
+| 4a | [Transaction boundaries vs concurrency control](04a-transaction-boundaries-vs-concurrency-control.md) | Deep dive into why independent `@Transactional` operations can overlap, what isolation does, and what actually prevents lost updates. |
 | 5 | [PostgreSQL MVCC](05-postgresql-mvcc.md) | Understand how readers can see committed row versions while another transaction is writing. |
 | 6 | [Transaction isolation](06-transaction-isolation.md) | Learn how snapshots and isolation levels affect what each transaction can observe. |
 | 7 | [Pessimistic locking](07-pessimistic-locking.md) | Study the first explicit write-coordination solution: lock the account row before changing it. |
@@ -110,6 +111,7 @@ Read the concept files in numerical order. The order follows the problem-solving
 - [x] Session 1 — concurrency versus parallelism and resource contention (teach-back completed).
 - [ ] Race conditions — definition introduced; independent explanation and final review pending.
 - [ ] Lost updates — read-modify-write, stale values, MVCC distinction, and database-side arithmetic studied; independent teach-back and comparison of prevention strategies pending.
+- [ ] `@Transactional` vs concurrency control — initial explanation discussed; review transaction propagation, isolation defaults, and independent teach-back.
 
 ## Status
 
