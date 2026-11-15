@@ -459,3 +459,47 @@ This is **write skew**, not a lost update. It is a serialization anomaly.
 - [ ] Explain why no serial execution could produce both successful leave approvals.
 - [ ] Explain how PostgreSQL SERIALIZABLE/SSI detects the dangerous dependency pattern.
 - [ ] Complete the two-session SQL experiment for REPEATABLE READ and SERIALIZABLE.
+
+
+---
+
+## 10. Isolation configuration and snapshot lifecycle — clarification
+
+**Date:** 15 November 2026
+
+### Question raised
+
+I asked how PostgreSQL decides whether to use READ COMMITTED or REPEATABLE READ, because I understood MVCC as maintaining consistency for everyone but was unsure whether PostgreSQL internally chooses REPEATABLE READ when reading.
+
+I also asked how two queries in one transaction can see different snapshots, and whether one query could read an old snapshot while another reads a new snapshot.
+
+### Technical clarification
+
+PostgreSQL uses MVCC for both READ COMMITTED and REPEATABLE READ. MVCC is the row-version and visibility mechanism; the isolation level determines the snapshot rules.
+
+- PostgreSQL's default isolation level is READ COMMITTED.
+- When no isolation is explicitly configured, Spring's @Transactional default Isolation.DEFAULT delegates to the underlying transaction system. With ordinary PostgreSQL defaults, that is READ COMMITTED.
+- READ COMMITTED establishes a new snapshot at the start of each SQL statement.
+- REPEATABLE READ establishes its transaction snapshot at the first non-transaction-control statement and reuses it for subsequent reads.
+- A single SELECT under READ COMMITTED does not switch snapshots halfway through its execution. If another transaction commits during that SELECT, the running statement continues to use its original snapshot.
+- Two successive statements in one READ COMMITTED transaction can see different committed states if another transaction commits between the start of those statements.
+- Two SQL commands on one ordinary database connection execute sequentially. Separate application requests can use separate connections and transactions concurrently.
+- A multi-query report that must use one consistent database view can use a read-only REPEATABLE READ transaction, provided that stable snapshot semantics are what the report requires.
+
+### Important distinction
+
+A snapshot is not a separate copied table or a physically frozen database. PostgreSQL uses MVCC row versions and transaction visibility rules to decide which version is visible under the current statement or transaction snapshot.
+
+### Recall in one sentence
+
+**MVCC provides row versions; READ COMMITTED uses a snapshot per statement; REPEATABLE READ reuses a snapshot for the transaction; PostgreSQL normally defaults to READ COMMITTED.**
+
+### Learning status
+
+- [x] Identify that MVCC is used by both isolation levels.
+- [x] Identify PostgreSQL's default isolation level.
+- [x] Understand the difference between a statement snapshot and a transaction snapshot.
+- [x] Understand that one SELECT does not change its snapshot halfway through execution.
+- [ ] Explain the configuration path from PostgreSQL default to Spring @Transactional independently.
+- [ ] Reproduce the two-query mixed-snapshot example with two sessions.
+- [ ] Explain when READ COMMITTED versus REPEATABLE READ READ ONLY is appropriate for reporting.
