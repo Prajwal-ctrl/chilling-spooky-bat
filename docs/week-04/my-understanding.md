@@ -333,7 +333,51 @@ When T2 tries to update a row that T1 changed after T2's REPEATABLE READ snapsho
 
 ---
 
-## 6. What I have been introduced to, but still need to explain in my own words
+## 6. Phantom reads — PostgreSQL behaviour
+
+**Date:** 15 November 2026
+
+### My answer during the guided exercise
+
+> Okay so It sees david's newly committed account because T2 continues to see the new snapshot of the tell me if this is correct or not...
+
+### What I corrected
+
+My answer was incorrect. I mixed up READ COMMITTED and REPEATABLE READ.
+
+In the exercise, T2 was using PostgreSQL REPEATABLE READ:
+
+1. T2's first SELECT finds two ACTIVE accounts and establishes the transaction snapshot.
+2. T1 inserts David as ACTIVE and commits.
+3. T2 runs the same SELECT again.
+4. T2 still gets two, because its later SELECT reuses the original snapshot. David's concurrently committed row is not visible to that snapshot.
+
+Under READ COMMITTED, T2's second SELECT would get a fresh statement snapshot and could return three.
+
+### My understanding, clarified in simple English
+
+A phantom read means I execute the same query again and the set of matching rows changes—for example, a newly inserted ACTIVE account appears in the result.
+
+- Under PostgreSQL READ COMMITTED, a later statement gets a new snapshot, so the newly committed David row can appear.
+- Under PostgreSQL REPEATABLE READ, later ordinary SELECT statements keep using the original snapshot, so David does not appear in T2's second result.
+- PostgreSQL REPEATABLE READ prevents phantom reads, even though the minimum SQL-standard definition of REPEATABLE READ allows them.
+- A transaction can still see its own earlier writes. The stable snapshot hides later commits from other transactions, not the transaction's own changes.
+
+### Recall in one sentence
+
+**A phantom read changes the set of rows returned by the same query; PostgreSQL READ COMMITTED can show the new matching row on a later statement, while PostgreSQL REPEATABLE READ keeps the original snapshot and does not show that concurrent insert.**
+
+### Learning status
+
+- [x] Understand the definition of a phantom read with guidance.
+- [x] Correct the difference between READ COMMITTED and REPEATABLE READ in this example.
+- [x] Record PostgreSQL's stronger-than-minimum REPEATABLE READ behaviour.
+- [ ] Explain phantom reads versus non-repeatable reads independently.
+- [ ] Explain why preventing phantom reads does not prevent all serialization anomalies.
+
+---
+
+## 7. What I have been introduced to, but still need to explain in my own words
 
 The following concepts were discussed during this learning session. I have not yet given a full teach-back in my own words for the remaining concepts, so these are marked as pending rather than presented as my personal understanding.
 
@@ -351,7 +395,7 @@ I should add my own explanation to each topic after I can explain it without sim
 
 ---
 
-## 7. How to use this journal
+## 8. How to use this journal
 
 For every new concept:
 
