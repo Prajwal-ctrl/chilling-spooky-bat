@@ -185,6 +185,14 @@ The bullets below are the **revision checklist** for Week 4. Main topics are lis
 
 ### 5. Transaction isolation
 - Isolation levels and the anomalies they control.
+- PostgreSQL's default_transaction_isolation and the effective isolation of the current transaction. See [06d — Isolation Configuration and Snapshot Lifecycle](docs/week-04/06d-isolation-configuration-and-snapshot-lifecycle.md).
+- How Spring @Transactional with Isolation.DEFAULT delegates to the database default.
+- Statement snapshots versus transaction snapshots.
+- Exact snapshot timing: statement start under READ COMMITTED and first non-transaction-control statement under REPEATABLE READ.
+- Why one SELECT never switches to a newer snapshot halfway through execution.
+- How two statements under READ COMMITTED can see different committed states.
+- Why read-only REPEATABLE READ can be useful for multi-query reports.
+- One connection and one transaction versus concurrent requests using separate connections.
 - Dirty reads, non-repeatable reads, phantom reads, and serialization anomalies.
 - READ COMMITTED: a fresh snapshot per statement.
 - REPEATABLE READ: stable snapshot and snapshot-establishment timing.
@@ -966,6 +974,7 @@ The docs/ directory is the long-term engineering knowledge base.
         ├── 06a-read-committed-vs-repeatable-read.md
         ├── 06b-phantom-reads.md
         ├── 06c-snapshot-isolation-and-write-skew.md
+        ├── 06d-isolation-configuration-and-snapshot-lifecycle.md
         ├── 07-pessimistic-locking.md
         ├── 08-deadlocks-and-lock-ordering.md
         ├── 09-optimistic-locking.md
