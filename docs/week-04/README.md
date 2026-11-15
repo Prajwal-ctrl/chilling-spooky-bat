@@ -96,6 +96,7 @@ Read the concept files in numerical order. The order follows the problem-solving
 | 5 | [PostgreSQL MVCC](05-postgresql-mvcc.md) | Understand how readers can see committed row versions while another transaction is writing. |
 | 6 | [Transaction isolation](06-transaction-isolation.md) | Learn the purpose of isolation levels and how visibility rules work. |
 | 6a | [READ COMMITTED vs REPEATABLE READ](06a-read-committed-vs-repeatable-read.md) | Work through statement snapshots, stable transaction snapshots, serialization failures, and snapshot timing in PostgreSQL. |
+| 6b | [Phantom reads](06b-phantom-reads.md) | Distinguish phantom reads from non-repeatable reads and compare PostgreSQL READ COMMITTED with REPEATABLE READ. |
 | 7 | [Pessimistic locking](07-pessimistic-locking.md) | Study the first explicit write-coordination solution: lock the account row before changing it. |
 | 8 | [Deadlocks and lock ordering](08-deadlocks-and-lock-ordering.md) | Understand a new problem that can arise when transactions hold multiple locks, and how consistent ordering reduces avoidable deadlocks. |
 | 9 | [Optimistic locking](09-optimistic-locking.md) | Compare a different strategy based on version checks. It is not automatically a better form of pessimistic locking; it can be preferable when conflicts are relatively uncommon. |
@@ -114,7 +115,8 @@ Read the concept files in numerical order. The order follows the problem-solving
 - [ ] Lost updates — read-modify-write, stale values, MVCC distinction, and database-side arithmetic studied; independent teach-back and comparison of prevention strategies pending.
 - [ ] `@Transactional` vs concurrency control — initial explanation discussed; review transaction propagation, isolation defaults, and independent teach-back.
 - [x] Guided teach-back — READ COMMITTED vs REPEATABLE READ snapshot behaviour, concurrent-update serialization failure, and first-query snapshot timing.
-- [ ] Transaction isolation — independently explain the scenarios, retry requirement, and limits of REPEATABLE READ.
+- [ ] Transaction isolation — independently explain snapshots, retry requirements, phantom reads, and the limits of REPEATABLE READ.
+- [x] Phantom reads — guided example and correction documented; independent teach-back still pending.
 
 ## Status
 
