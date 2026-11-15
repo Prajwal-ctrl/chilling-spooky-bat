@@ -873,6 +873,7 @@ The docs/ directory is the long-term engineering knowledge base.
         ├── 04a-transaction-boundaries-vs-concurrency-control.md
         ├── 05-postgresql-mvcc.md
         ├── 06-transaction-isolation.md
+        ├── 06a-read-committed-vs-repeatable-read.md
         ├── 07-pessimistic-locking.md
         ├── 08-deadlocks-and-lock-ordering.md
         ├── 09-optimistic-locking.md
