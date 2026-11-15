@@ -276,13 +276,70 @@ Without one shared database transaction, an exception between these operations c
 
 ---
 
-## 5. What I have been introduced to, but still need to explain in my own words
+## 5. READ COMMITTED vs REPEATABLE READ — snapshot behaviour
+
+**Date:** 15 November 2026
+
+### My answers during the guided exercise
+
+**Scenario 1 — READ COMMITTED**
+
+> T2 will see 15000 because of the READ COMMITTED statement in postgresql as when T1 updates it default uses READ COMMITED FOR T2
+
+**Scenario 2 — REPEATABLE READ, second SELECT**
+
+> Now T2 will read 20000 because it uses the REPEATABLE READ INSTEAD OF READ COMMITED VALUE SO IT DON'T READ THE UPDATED SNAPSHOT VALUE IT READ IT'S PREVIOUS VALUE ONLY BECAUSE OF "REPEATABLE READ"
+
+**Scenario 3 — T2 tries to update a row changed after its snapshot**
+
+> A because although after T1 the balance was updated to 15,000 but because of "REPEATABLE READ" it will still read the value 20,000 so it updates the balance to 18,000
+
+**Scenario 4 — T1 commits before T2's first SELECT**
+
+> it will allowed to update as T2 executes first SELECT statement not the second one so it will see the updated balance even though it uses REPEATABLE READ
+
+### What I understood correctly
+
+- Under PostgreSQL READ COMMITTED, each statement gets a fresh snapshot. If T1 commits ₹15,000 after T2's first SELECT, T2's second SELECT can see ₹15,000.
+- Under PostgreSQL REPEATABLE READ, T2 keeps the snapshot established by its first non-transaction-control statement. If T1 commits after that snapshot, T2's later ordinary SELECT still sees the earlier ₹20,000 version.
+- If T1 commits before T2's first snapshot-establishing statement, T2's snapshot includes ₹15,000. BEGIN alone does not establish the snapshot.
+
+### What I corrected
+
+My answer to Scenario 3 was not correct. It is true that T2's snapshot still shows ₹20,000, but that does **not** mean PostgreSQL lets T2 overwrite the newer committed row with ₹18,000.
+
+When T2 tries to update a row that T1 changed after T2's REPEATABLE READ snapshot, PostgreSQL raises a serialization failure (`SQLSTATE 40001`). T2 must abort and retry the entire transaction from the beginning. It should not retry only the failed UPDATE because its earlier reads and business validations were based on the old snapshot.
+
+### My understanding, clarified in simple English
+
+- **READ COMMITTED:** Every new SQL statement gets a fresh view of committed data. A second SELECT can see a change that another transaction committed after the first SELECT.
+- **REPEATABLE READ:** My transaction keeps the same snapshot for its reads. Another transaction's later commit does not appear in my later SELECT statements.
+- **Conflicting write under REPEATABLE READ:** Keeping an old snapshot does not give my transaction permission to overwrite a row that another transaction changed after that snapshot. PostgreSQL rejects the update and I must retry the whole transaction.
+- **Snapshot timing:** BEGIN does not establish the snapshot. The first non-transaction-control SQL statement establishes it. If T1 commits before that statement, T2 can see T1's committed value.
+
+### Recall in one sentence
+
+**READ COMMITTED takes a fresh snapshot for every statement; REPEATABLE READ keeps a stable snapshot from the first non-transaction-control statement, and PostgreSQL rejects a conflicting update to a row changed after that snapshot.**
+
+### Learning status
+
+- [x] Predict the second SELECT result under READ COMMITTED.
+- [x] Predict the second SELECT result under REPEATABLE READ.
+- [x] Understand why a conflicting update fails with SQLSTATE 40001.
+- [x] Understand why the whole transaction must be retried.
+- [x] Understand that the snapshot is established by the first non-transaction-control statement, not BEGIN alone.
+- [ ] Explain all four scenarios independently without notes.
+- [ ] Explain the limits of REPEATABLE READ and compare it with SERIALIZABLE.
+
+---
+
+## 6. What I have been introduced to, but still need to explain in my own words
 
 The following concepts were discussed during this learning session. I have not yet given a full teach-back in my own words for the remaining concepts, so these are marked as pending rather than presented as my personal understanding.
 
 - **Race conditions:** how timing-dependent execution can cause an incorrect result.
 - **Lost updates:** how one read-modify-write operation can overwrite another operation's effect.
-- **Transaction isolation:** how READ COMMITTED and REPEATABLE READ provide different visibility guarantees.
+- **Transaction isolation beyond the snapshot scenarios:** compare SERIALIZABLE, understand serialization anomalies/write skew, and decide when stronger isolation or explicit locks are needed.
 - **Pessimistic locking:** how `SELECT ... FOR UPDATE` coordinates competing modifications.
 - **Optimistic locking:** how a version column can detect that a row changed before an update.
 - **Lock lifetime and waiting:** when PostgreSQL releases row locks, what `lock_timeout` controls, and how lock waits can be inspected.
@@ -294,7 +351,7 @@ I should add my own explanation to each topic after I can explain it without sim
 
 ---
 
-## 6. How to use this journal
+## 7. How to use this journal
 
 For every new concept:
 
