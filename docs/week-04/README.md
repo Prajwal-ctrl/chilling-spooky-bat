@@ -105,7 +105,14 @@ Read the concept files in numerical order. The order follows the problem-solving
 
 - [My understanding and learning journal](my-understanding.md) — original explanations, corrections, and personal revision notes.
 
+## Learning progress
+
+- [x] Session 1 — concurrency versus parallelism and resource contention (teach-back completed).
+- [ ] Race conditions — initial explanation discussed; independent teach-back still pending.
+- [ ] Lost updates — example, stale Java-calculated value, MVCC distinction, and database-side arithmetic introduced; deeper review and teach-back pending.
+
 ## Status
+
 
 - [ ] Conceptual learning completed
 - [ ] Concept review questions passed
