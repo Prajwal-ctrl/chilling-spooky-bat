@@ -149,18 +149,108 @@ Expected outcome:
 
 **Focus:** Understand how overlapping payment requests can corrupt account balances.
 
-Concepts:
-- Concurrency versus parallelism.
-- Race conditions.
-- Lost updates.
-- PostgreSQL MVCC and row-version visibility.
-- READ COMMITTED versus REPEATABLE READ.
-- Pessimistic versus optimistic locking.
-- Row-level locks and lock lifetime.
-- Lock waiting and lock timeout.
-- Deadlocks and deterministic lock ordering.
-- Spring @Transactional behavior.
-- Concurrency testing fundamentals.
+## Week 4 topic and subtopic checklist
+
+The bullets below are the **revision checklist** for Week 4. Main topics are listed first; their subtopics are nested underneath so that a short topic name does not hide the details that need to be learned. Each focused subtopic will receive its own Markdown file when we study it. The Week 4 folder README is the detailed index, and the personal journal preserves original explanations and corrections.
+
+### 1. Concurrency versus parallelism
+- Concurrency: overlapping progress of tasks.
+- Parallelism: simultaneous execution on separate processing resources.
+- Resource contention: competing for a shared resource.
+- How a single JVM can execute concurrent and parallel requests.
+
+### 2. Race conditions
+- What makes an execution order a race condition.
+- Interleavings and timing-dependent correctness.
+- Race condition versus data race.
+- Why absence of a pessimistic lock is not the definition of a race condition.
+
+### 3. Lost updates and stale values
+- Read-modify-write sequence.
+- Two transactions reading the same old value.
+- Stale application values versus dirty reads.
+- How a later absolute-value write loses an earlier update.
+- Database-side arithmetic versus application-calculated absolute values.
+- Conditional updates and minimum-balance invariants.
+- Prevention strategies: atomic SQL, pessimistic locking, and optimistic locking.
+
+### 4. PostgreSQL MVCC and row-version visibility
+- MVCC purpose and multiple row versions.
+- Committed versus uncommitted row versions.
+- Snapshot visibility.
+- Normal SELECT versus SELECT FOR UPDATE.
+- What readers see while another transaction updates a row.
+- What a later statement sees after a commit under READ COMMITTED.
+- How MVCC and write coordination solve different problems.
+
+### 5. Transaction isolation
+- Isolation levels and the anomalies they control.
+- Dirty reads, non-repeatable reads, phantom reads, and serialization anomalies.
+- READ COMMITTED: a fresh snapshot per statement.
+- REPEATABLE READ: stable snapshot and snapshot-establishment timing.
+- Conflicting updates and SQLSTATE 40001.
+- Retrying the entire transaction after serialization failure.
+- Phantom reads under PostgreSQL READ COMMITTED versus REPEATABLE READ.
+- Snapshot Isolation and its relationship to PostgreSQL REPEATABLE READ.
+- Write skew and other serialization anomalies.
+- SERIALIZABLE isolation and PostgreSQL Serializable Snapshot Isolation (SSI).
+- Read-your-own-writes behaviour.
+- Choosing isolation versus explicit locking for business invariants.
+
+### 6. Pessimistic versus optimistic locking
+- Pessimistic locking: acquire a conflicting lock before changing data.
+- Optimistic locking: detect a concurrent change using a version check.
+- PostgreSQL SELECT FOR UPDATE and relevant row-locking modes.
+- JPA/Hibernate @Lock and @Version.
+- Conflict handling, retries, contention, and throughput trade-offs.
+- When each strategy is appropriate.
+
+### 7. Row-level locks and lock lifetime
+- What a row-level lock protects.
+- Lock acquisition and conflicting lock requests.
+- Lock compatibility and waiting.
+- Lock release on COMMIT and ROLLBACK.
+- Why transaction duration affects contention.
+- Locking two account rows for one transfer.
+
+### 8. Lock waiting and lock timeout
+- Why a transaction waits for another transaction's lock.
+- lock_timeout versus statement_timeout versus deadlock_timeout.
+- What happens when a lock wait times out.
+- Inspecting blocked and blocking sessions with pg_stat_activity.
+- Inspecting lock state with pg_locks.
+- Keeping database transactions short.
+
+### 9. Deadlocks and deterministic lock ordering
+- Circular wait and the wait-for graph.
+- Opposite-direction account transfers.
+- PostgreSQL deadlock detection and victim transaction.
+- Deterministic account-ID lock ordering.
+- Deadlock error handling and safe transaction retry.
+- Why deterministic ordering reduces, but does not eliminate, every possible deadlock.
+
+### 10. Spring @Transactional behaviour
+- Transaction boundaries and the transaction manager.
+- Atomicity versus isolation versus concurrency control.
+- Propagation: REQUIRED and other propagation modes.
+- Isolation configuration and database defaults.
+- Rollback rules for runtime and checked exceptions.
+- Thread-bound transaction context and asynchronous work.
+- Proxy behaviour and self-invocation considerations.
+- Keeping remote calls and long-running work outside row-locking transactions where possible.
+
+### 11. Concurrency testing fundamentals
+- Why ordinary sequential tests do not prove concurrency correctness.
+- Deterministic interleavings with CountDownLatch and CyclicBarrier.
+- Why Thread.sleep is not a reliable synchronization strategy.
+- Multiple threads, transactions, and database connections.
+- Reproducing a lost update before applying a fix.
+- Testing minimum balance, atomic debit/credit, rollback, and conservation invariants.
+- Testing same-account contention and unrelated-account independence.
+- Testcontainers-based PostgreSQL integration tests.
+- Recording test evidence and repeatable experiments.
+
+**Documentation rule:** Existing main-topic files hold the topic overview. Focused subtopics use lettered files such as \`04a-...\`, \`06a-...\`, and \`06b-...\`. Every new subtopic must be linked from this root checklist and [the Week 4 detailed index](docs/week-04/README.md). A subtopic is not considered complete merely because its file exists; it needs an explanation, examples, a teach-back, and any required experiment or test evidence.
 
 Expected outcome:
 - Be able to predict what competing transactions can read and modify.
