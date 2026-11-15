@@ -226,7 +226,57 @@ This is not a dirty read. T2 read a previously committed value, not T1's uncommi
 
 ---
 
-## 4. What I have been introduced to, but still need to explain in my own words
+## 4. @Transactional — transaction boundary vs concurrency control
+
+**Date:** 15 November 2026
+
+### My explanation
+
+> so now why @Transational doesn't guarantee that 2 transaction won't overlap each other or can not read dirty or steal data it just guaranty that whatever transaction a particular thread has initialized it will be either completed successfully or completely rolled back it takes the guaranty of just 1 transaction not the whole ecosystem ....
+
+### What I understood correctly
+
+I identified that `@Transactional` does not prevent two independent transactions from overlapping. Each transaction can have its own transaction boundary and can commit or roll back independently. Making T1 atomic does not automatically coordinate T1 with T2.
+
+### My understanding, clarified
+
+- `@Transactional` tells Spring to apply transaction semantics to a method or class through the configured transaction manager.
+- It can make participating database operations commit together or roll back together.
+- It does not act as a global lock and does not automatically prevent two independent transactions from overlapping.
+- It does not automatically lock every row read by the method or prevent every stale-read/lost-update pattern.
+- The annotation's default isolation is `Isolation.DEFAULT`, which delegates to the underlying transaction system. In our PostgreSQL setup, the database default is READ COMMITTED.
+- PostgreSQL READ COMMITTED prevents dirty reads. That protection comes from PostgreSQL's isolation behavior, not simply from adding the Spring annotation.
+- A stale application-side value and a lost update can still happen under READ COMMITTED when Java reads a balance, calculates an absolute replacement value, and writes it later.
+- Spring's default propagation is `REQUIRED`: a method joins an existing transaction when appropriate, or starts one if there is no existing transaction. Therefore, it is not always accurate to say one annotated method or one thread always equals one independent physical transaction.
+- In the usual imperative Spring transaction model, the transaction context is generally bound to the current thread. Work started on another thread does not automatically join the original transaction.
+- By default, Spring rolls back for `RuntimeException` and `Error`; checked exceptions do not trigger rollback unless rollback rules are configured.
+
+### The financial example I asked to preserve
+
+Alice transfers ₹4,000 to Bob. The service has three database operations:
+
+1. Debit Alice.
+2. Credit Bob.
+3. Create the payment record.
+
+Without one shared database transaction, an exception between these operations could leave Alice debited by ₹4,000 while Bob receives ₹0 and the transfer remains incomplete. A shared transaction protects the all-or-nothing persistence of these participating database operations.
+
+### Recall in one sentence
+
+**`@Transactional` manages the transaction boundary and atomicity of participating work; database isolation controls visibility, while locking or another concurrency-control strategy is needed to coordinate conflicting operations.**
+
+### Status
+
+- [x] Identify that two independent `@Transactional` methods can overlap.
+- [x] Distinguish per-transaction atomicity from application-wide serialization.
+- [x] Identify that PostgreSQL READ COMMITTED, not the annotation alone, prevents dirty reads.
+- [ ] Explain propagation and transaction participation without notes.
+- [ ] Explain how isolation differs from atomicity.
+- [ ] Explain independently why `@Transactional` does not prevent the lost-update example.
+
+---
+
+## 5. What I have been introduced to, but still need to explain in my own words
 
 The following concepts were discussed during this learning session. I have not yet given a full teach-back in my own words for the remaining concepts, so these are marked as pending rather than presented as my personal understanding.
 
@@ -244,7 +294,7 @@ I should add my own explanation to each topic after I can explain it without sim
 
 ---
 
-## 5. How to use this journal
+## 6. How to use this journal
 
 For every new concept:
 
