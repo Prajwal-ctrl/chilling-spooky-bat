@@ -293,6 +293,8 @@ After Session A has committed, remove David so the next experiment starts with t
 Run in either session:
 
 ```sql
+BEGIN;
+
 DELETE FROM week4_phantom_demo
 WHERE account_id = 104;
 
