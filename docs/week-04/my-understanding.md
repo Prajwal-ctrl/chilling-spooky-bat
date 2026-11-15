@@ -461,6 +461,29 @@ This is **write skew**, not a lost update. It is a serialization anomaly.
 - [ ] Complete the two-session SQL experiment for REPEATABLE READ and SERIALIZABLE.
 
 
+
+### My SSI checkpoint answers
+
+- Q1: **B** — Predicate-lock information tracks what a transaction reads so dangerous concurrent read-write dependencies can be detected.
+- Q2: **A** — SSI predicate-lock information is not an ordinary blocking row lock and normally does not make writers wait.
+
+### My explanation
+
+> Okay so according to business logic both rows were depend on each other ....so before writing T1 ...T1 reads T2 and before writing T2 it reads T1
+
+### Clarification
+
+The idea that the transactions depend on each other's data was correct, but the precise wording is that each transaction reads database rows that the other transaction later changes. T1 does not read T2 itself, and T2 does not read T1 itself.
+
+- T1 reads Alice=TRUE and Bob=TRUE. T2 later writes Bob=FALSE. This creates the read-write anti-dependency T1 → T2.
+- T2 reads Alice=TRUE and Bob=TRUE. T1 later writes Alice=FALSE. This creates the read-write anti-dependency T2 → T1.
+
+The two dependencies form a cycle, which means both transactions cannot be placed in a valid serial order while preserving the observed reads and writes.
+
+### Recall in one sentence
+
+**A read-write anti-dependency points from the transaction that read a version to the concurrent transaction that later writes data that would have changed that read. In the doctor example, T1 → T2 and T2 → T1 form a cycle.**
+
 ---
 
 ## 10. Isolation configuration and snapshot lifecycle — clarification
