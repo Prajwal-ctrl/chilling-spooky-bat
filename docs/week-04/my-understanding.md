@@ -419,3 +419,43 @@ My predicted result is correct: T2 gets **2**, not 3.
 A more precise way to say it is: **T2's transaction is running at PostgreSQL REPEATABLE READ isolation level.** Its first SELECT established a snapshot, and the second SELECT reuses that snapshot. David was committed by another transaction after the snapshot was established, so he is not visible to T2's second SELECT.
 
 READ COMMITTED is not a value that T2 reads. It is another transaction isolation level. Under READ COMMITTED, T2's second SELECT would take a fresh snapshot and return 3.
+
+
+---
+
+## 9. Snapshot Isolation and write skew — learning in progress
+
+**Date:** 15 November 2026
+
+### My answer during the guided exercise
+
+> so In this situation both independent row updates the data... whereas as per buisness logic only one is allowed
+
+### What I understood correctly
+
+I identified the key outcome: the two transactions update different rows, but the business rule says both leave requests must not be approved. The combined result violates the rule.
+
+### My understanding, clarified
+
+Both transactions read the same initial condition: Alice and Bob are on call. T1 then updates Alice's row, while T2 updates Bob's row.
+
+- T1's read set includes Alice and Bob; its write set contains Alice's row.
+- T2's read set includes Alice and Bob; its write set contains Bob's row.
+- The read sets overlap, but the write sets are different.
+- PostgreSQL REPEATABLE READ does not detect this as a same-row update conflict, so both transactions can commit.
+- The final state has zero doctors on call, violating the business invariant.
+
+This is **write skew**, not a lost update. It is a serialization anomaly.
+
+### Recall in one sentence
+
+**Write skew occurs when concurrent transactions make decisions from overlapping reads but update different rows, allowing both to commit under Snapshot Isolation even though their combined result violates a business rule.**
+
+### Learning status
+
+- [x] Identify that the transactions update different rows.
+- [x] Identify that the business rule is violated by the combined result.
+- [ ] Explain read sets and write sets independently.
+- [ ] Explain why no serial execution could produce both successful leave approvals.
+- [ ] Explain how PostgreSQL SERIALIZABLE/SSI detects the dangerous dependency pattern.
+- [ ] Complete the two-session SQL experiment for REPEATABLE READ and SERIALIZABLE.
