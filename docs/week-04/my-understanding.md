@@ -406,3 +406,16 @@ For every new concept:
 5. Keep unresolved questions for later revision.
 
 The purpose is to track how my understanding improves, including the mistakes I corrected—not to make every first attempt sound perfect.
+
+
+### My follow-up answer after the phantom-read exercise
+
+> Okay so T2 will see 2 records only because it is not reading from READ COMMITED it is reading from REPEATABLE READ and this is the reason it will see only 2 instead of 3
+
+### Clarification
+
+My predicted result is correct: T2 gets **2**, not 3.
+
+A more precise way to say it is: **T2's transaction is running at PostgreSQL REPEATABLE READ isolation level.** Its first SELECT established a snapshot, and the second SELECT reuses that snapshot. David was committed by another transaction after the snapshot was established, so he is not visible to T2's second SELECT.
+
+READ COMMITTED is not a value that T2 reads. It is another transaction isolation level. Under READ COMMITTED, T2's second SELECT would take a fresh snapshot and return 3.
