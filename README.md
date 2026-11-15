@@ -870,6 +870,7 @@ The docs/ directory is the long-term engineering knowledge base.
         ├── 02-race-conditions.md
         ├── 03-lost-updates.md
         ├── 04-spring-transactions.md
+        ├── 04a-transaction-boundaries-vs-concurrency-control.md
         ├── 05-postgresql-mvcc.md
         ├── 06-transaction-isolation.md
         ├── 07-pessimistic-locking.md
