@@ -45,6 +45,12 @@ If an unchecked exception happens before the transaction commits, Spring rolls b
 - @Transactional gives us a transaction boundary, but it does not automatically solve every concurrency problem. We may still need locking or another concurrency-control strategy.
 - Keep the transaction short, especially when it holds account locks.
 
+### Important companion topic
+
+This note introduces Spring transaction boundaries. The separate [Transaction Boundaries vs Concurrency Control](04a-transaction-boundaries-vs-concurrency-control.md) deep dive explains why two `@Transactional` methods can overlap and why transaction atomicity alone does not prevent every lost update.
+
+
+
 ### Easy way to remember
 
 **A transfer should be all-or-nothing: either the debit, credit and payment record all commit, or none of them do.**
