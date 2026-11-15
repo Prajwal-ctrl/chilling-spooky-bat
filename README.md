@@ -192,7 +192,7 @@ The bullets below are the **revision checklist** for Week 4. Main topics are lis
 - Retrying the entire transaction after serialization failure.
 - Phantom reads under PostgreSQL READ COMMITTED versus REPEATABLE READ.
 - Snapshot Isolation and its relationship to PostgreSQL REPEATABLE READ.
-- Write skew and other serialization anomalies.
+- Write skew, read sets/write sets, and other serialization anomalies. See [06c — Snapshot Isolation and Write Skew](docs/week-04/06c-snapshot-isolation-and-write-skew.md).
 - SERIALIZABLE isolation and PostgreSQL Serializable Snapshot Isolation (SSI).
 - Read-your-own-writes behaviour.
 - Choosing isolation versus explicit locking for business invariants.
@@ -965,6 +965,7 @@ The docs/ directory is the long-term engineering knowledge base.
         ├── 06-transaction-isolation.md
         ├── 06a-read-committed-vs-repeatable-read.md
         ├── 06b-phantom-reads.md
+        ├── 06c-snapshot-isolation-and-write-skew.md
         ├── 07-pessimistic-locking.md
         ├── 08-deadlocks-and-lock-ordering.md
         ├── 09-optimistic-locking.md
