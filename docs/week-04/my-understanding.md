@@ -169,19 +169,60 @@ This is the important difference I understood:
 
 For a withdrawal, we should also enforce the minimum-balance condition in the UPDATE and check the affected-row count. For a complete transfer, source debit and destination credit still need one transaction.
 
+### Read-modify-write, stale reads, and the ₹20,000 exercise
+
+We studied the common read-modify-write pattern:
+
+1. **Read:** fetch the current account balance from PostgreSQL.
+2. **Modify:** calculate the new balance in Java.
+3. **Write:** persist the calculated value back to PostgreSQL.
+
+My understanding of a stale value is that it was correct when the application read it, but another transaction committed a newer value before the application used its old copy.
+
+For the ₹20,000 exercise, I answered:
+
+> so Read Read Write update write update
+> when T1 updates the actual balance or writes the balance and T2 is still in read mode or write mode at that time T2 value becomes stale
+> because it maybe read from service layer of java instead of directly from Database and it doesn't read the read committed value from DB
+> actual balance will be 18000 instead of 13000
+
+### My understanding, clarified
+
+The exercise was:
+
+- Initial balance: ₹20,000.
+- T1 withdraws ₹5,000 and calculates ₹15,000.
+- T2 withdraws ₹2,000 and calculates ₹18,000.
+- Both transactions read ₹20,000 before either writes.
+- T1 writes ₹15,000 and commits.
+- T2 writes its previously calculated absolute value of ₹18,000 afterward.
+
+The expected balance, if both withdrawals succeed, is ₹13,000. The actual balance in this write order is ₹18,000 because T2 overwrites T1's update.
+
+One correction to my explanation: T2 originally **did read from PostgreSQL**. After that query, it kept a local value in its Java variable or entity. PostgreSQL committing a new value does not automatically refresh that existing Java value. A new query or an explicit refresh/locking strategy is needed to obtain the current value.
+
+A stale value and a lost update are related but different:
+
+- **Stale value:** the outdated value held by the application.
+- **Lost update:** the incorrect result caused when a later write based on that stale value overwrites an earlier update.
+
+This is not a dirty read. T2 read a previously committed value, not T1's uncommitted change.
+
 ### Recall in one sentence
 
-**MVCC controls what a transaction reads; it does not automatically refresh an absolute value that Java calculated from an older read. Database-side arithmetic can apply an operation to the current row version under READ COMMITTED.**
+**Read-modify-write means read a value, calculate a replacement, and write it later; a stale Java value does not refresh automatically when another transaction commits, and using it for a later absolute-value write can cause a lost update.**
 
 ### Learning status
 
 - [x] Identify that a lost update can be a race condition.
 - [x] Understand that both transactions can read the same old balance.
-- [x] Explain why an absolute value calculated in Java can remain stale even if the UPDATE waits.
-- [x] Explain the basic difference between `SET balance = 7000` and `SET balance = balance - 3000`.
+- [x] Calculate expected and actual balances in the ₹20,000 exercise.
+- [x] Explain that Java's local value does not refresh automatically after another transaction commits.
+- [x] Distinguish a stale value from a dirty read.
 - [ ] Explain the complete execution timeline independently, without hints.
 - [ ] Understand and compare read-modify-write, atomic SQL updates, pessimistic locking, and optimistic locking in more depth.
 - [ ] Apply these approaches in a deterministic PostgreSQL concurrency experiment.
+
 
 ---
 
