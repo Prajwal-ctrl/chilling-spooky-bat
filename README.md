@@ -964,6 +964,7 @@ The docs/ directory is the long-term engineering knowledge base.
         ├── 05-postgresql-mvcc.md
         ├── 06-transaction-isolation.md
         ├── 06a-read-committed-vs-repeatable-read.md
+        ├── 06b-phantom-reads.md
         ├── 07-pessimistic-locking.md
         ├── 08-deadlocks-and-lock-ordering.md
         ├── 09-optimistic-locking.md
