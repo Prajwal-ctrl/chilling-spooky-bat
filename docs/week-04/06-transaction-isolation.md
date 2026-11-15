@@ -1,5 +1,9 @@
 # Transaction Isolation
 
+## Further reading
+
+For detailed worked timelines and the guided learning checkpoint covering statement snapshots, stable snapshots, serialization failures, and snapshot timing, see [READ COMMITTED vs REPEATABLE READ — Snapshot Behaviour](06a-read-committed-vs-repeatable-read.md).
+
 ## Purpose
 
 Transaction isolation defines how concurrent transactions observe one another's effects and which interleavings the database permits.
