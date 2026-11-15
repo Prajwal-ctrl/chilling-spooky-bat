@@ -96,7 +96,96 @@ These are different ideas:
 
 ---
 
-## 2. What I have been introduced to, but still need to explain in my own words
+## 3. Race Conditions and Lost Updates — learning in progress
+
+**Date:** 15 November 2026
+
+### My first explanation of a race condition
+
+> So what I think about race conditions is race condition occurs when two resources or two threads try to update the same shared record, but without the pessimistic lock. So Alice has 10,000 rupees in his account, and T1 is trying to update it to 14,000 dollar, and T2 is trying to cut it down by 4,000. So both of them are reading two different values, and that is when the race condition is occur.
+
+### What we clarified
+
+A race condition is not defined only by the absence of pessimistic locking. It happens when the correctness of a result depends on the timing or ordering of concurrent operations, and a possible execution order produces an incorrect result.
+
+A lost update is one specific example of a race condition. Other concurrency-control strategies, such as optimistic version checks or atomic SQL updates, can also prevent particular unsafe outcomes.
+
+### My first answer to the lost-update exercise
+
+> Final balance: 3000
+> My reasoning: this happens because we don't follow the pessemestic lock on row level so both of them read different values
+
+### What I corrected
+
+In the example, both T1 and T2 read **the same old value: ₹10,000**. They calculate different new values because their withdrawal amounts differ:
+
+- T1 calculates ₹10,000 − ₹4,000 = ₹6,000.
+- T2 calculates ₹10,000 − ₹3,000 = ₹7,000.
+
+If T1 writes ₹6,000 and T2 later writes its previously calculated absolute value of ₹7,000, the final balance is ₹7,000. The expected balance, if both withdrawals succeed, is ₹3,000. The later write has overwritten the effect of T1.
+
+### My question about PostgreSQL MVCC
+
+I asked why MVCC does not prevent this race condition, because I expected T2 to wait until T1 commits rather than read an old record.
+
+### My understanding, clarified
+
+MVCC and write coordination solve related but different problems:
+
+- MVCC controls which row versions a transaction can see. An ordinary SELECT under READ COMMITTED can read the previously committed version while another transaction has an uncommitted update.
+- A conflicting UPDATE does coordinate through PostgreSQL row locking. T2 may wait for T1 to commit.
+- But if Java already calculated an absolute replacement value such as ₹7,000 using the old ₹10,000 balance, waiting does not recalculate that value.
+
+### What I understood about database-side arithmetic
+
+I compared these two updates:
+
+Application-calculated absolute value:
+
+```sql
+UPDATE account
+SET balance = 7000
+WHERE account_id = 'ALICE';
+```
+
+Database-side arithmetic:
+
+```sql
+UPDATE account
+SET balance = balance - 3000
+WHERE account_id = 'ALICE';
+```
+
+My explanation was:
+
+> because here 1st one actual deduct the amount from updated value rather than doing calculation on java side and then update the balance directly
+
+### My understanding, clarified
+
+This is the important difference I understood:
+
+- With `SET balance = 7000`, Java has already calculated the absolute balance using a value it read earlier. If the UPDATE waits for another transaction, the literal ₹7,000 does not get recalculated.
+- With `SET balance = balance - 3000`, PostgreSQL performs the subtraction as part of the UPDATE. Under READ COMMITTED, after waiting for a concurrent updater, PostgreSQL applies the expression to the updated row version. If T1 has committed ₹6,000, T2 subtracts ₹3,000 from ₹6,000, resulting in ₹3,000.
+
+For a withdrawal, we should also enforce the minimum-balance condition in the UPDATE and check the affected-row count. For a complete transfer, source debit and destination credit still need one transaction.
+
+### Recall in one sentence
+
+**MVCC controls what a transaction reads; it does not automatically refresh an absolute value that Java calculated from an older read. Database-side arithmetic can apply an operation to the current row version under READ COMMITTED.**
+
+### Learning status
+
+- [x] Identify that a lost update can be a race condition.
+- [x] Understand that both transactions can read the same old balance.
+- [x] Explain why an absolute value calculated in Java can remain stale even if the UPDATE waits.
+- [x] Explain the basic difference between `SET balance = 7000` and `SET balance = balance - 3000`.
+- [ ] Explain the complete execution timeline independently, without hints.
+- [ ] Understand and compare read-modify-write, atomic SQL updates, pessimistic locking, and optimistic locking in more depth.
+- [ ] Apply these approaches in a deterministic PostgreSQL concurrency experiment.
+
+---
+
+## 4. What I have been introduced to, but still need to explain in my own words
 
 The following concepts were discussed during this learning session. I have not yet given a full teach-back in my own words for the remaining concepts, so these are marked as pending rather than presented as my personal understanding.
 
@@ -114,7 +203,7 @@ I should add my own explanation to each topic after I can explain it without sim
 
 ---
 
-## 3. How to use this journal
+## 5. How to use this journal
 
 For every new concept:
 
