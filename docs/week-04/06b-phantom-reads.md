@@ -299,7 +299,7 @@ WHERE account_id = 104;
 COMMIT;
 ```
 
-Expected active-account count is now **2**. In autocommit mode, the DELETE is committed automatically; the explicit COMMIT is harmless when no transaction is open.
+Expected active-account count is now **2**. The explicit transaction makes the cleanup and commit sequence clear.
 
 ### Experiment B — PostgreSQL READ COMMITTED
 
