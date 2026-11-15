@@ -496,3 +496,42 @@ The deeper mechanism is:
 - [PostgreSQL 18 — Transaction Isolation](https://www.postgresql.org/docs/18/transaction-iso.html)
 - [PostgreSQL 18 — Serializable Isolation and Predicate Locking](https://www.postgresql.org/docs/18/transaction-iso.html#XACT-SERIALIZABLE)
 - [PostgreSQL — Serializable Snapshot Isolation wiki](https://wiki.postgresql.org/wiki/SSI)
+
+
+## 13. SSI teach-back — read-write dependencies
+
+### My answers to the checkpoint
+
+- Question 1: **B** — PostgreSQL tracks what a SERIALIZABLE transaction reads so that dangerous concurrent read-write dependencies can be detected.
+- Question 2: **A** — SSI predicate-lock information is not the same as a blocking SELECT FOR UPDATE row lock; it normally does not make writers wait.
+
+### My explanation
+
+> Okay so according to business logic both rows were depend on each other ....so before writing T1 ...T1 reads T2 and before writing T2 it reads T1
+
+### Technical clarification
+
+The intuition that the transactions depend on each other's data was correct, but a transaction does not literally read another transaction. Each transaction reads database rows; the other transaction later writes a row that was read.
+
+- T1 reads Alice=TRUE and Bob=TRUE. T2 later writes Bob=FALSE. This creates a read-write anti-dependency **T1 → T2**.
+- T2 reads Alice=TRUE and Bob=TRUE. T1 later writes Alice=FALSE. This creates a read-write anti-dependency **T2 → T1**.
+
+Together these edges form a dependency cycle:
+
+    T1 ──rw──> T2
+     ^          |
+     |          |
+     └───rw─────┘
+
+A useful way to remember the direction is: **reader → concurrent writer whose change would have altered that earlier read**.
+
+PostgreSQL SSI monitors read-write dependencies and detects dangerous structures that could lead to a serialization anomaly. Its implementation uses predicate-lock information (SIReadLock) for tracking; these are not ordinary blocking row locks. The detailed SSI algorithm looks for dangerous structures involving consecutive read-write anti-dependencies, rather than simply waiting for a completed cycle and then checking it.
+
+### Learning status
+
+- [x] Identify why SSI tracks reads and concurrent writes.
+- [x] Distinguish predicate-lock tracking from blocking row locks.
+- [x] Explain that the transactions read rows, not each other.
+- [x] Identify T1 → T2 and T2 → T1 read-write anti-dependencies in the doctor example.
+- [ ] Explain the SSI dangerous-structure rule in more detail.
+- [ ] Complete the two-session SQL lab under REPEATABLE READ and SERIALIZABLE.
