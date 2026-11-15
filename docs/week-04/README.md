@@ -108,8 +108,8 @@ Read the concept files in numerical order. The order follows the problem-solving
 ## Learning progress
 
 - [x] Session 1 — concurrency versus parallelism and resource contention (teach-back completed).
-- [ ] Race conditions — initial explanation discussed; independent teach-back still pending.
-- [ ] Lost updates — example, stale Java-calculated value, MVCC distinction, and database-side arithmetic introduced; deeper review and teach-back pending.
+- [ ] Race conditions — definition introduced; independent explanation and final review pending.
+- [ ] Lost updates — read-modify-write, stale values, MVCC distinction, and database-side arithmetic studied; independent teach-back and comparison of prevention strategies pending.
 
 ## Status
 
