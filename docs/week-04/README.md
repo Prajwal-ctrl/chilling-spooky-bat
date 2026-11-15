@@ -121,7 +121,8 @@ Read the concept files in numerical order. The order follows the problem-solving
 - [x] READ COMMITTED snapshot lifecycle — teach-back completed: one statement retains its snapshot; a later statement gets a fresh snapshot.
 - [ ] Isolation configuration and reporting — independently explain PostgreSQL/Spring defaults and reproduce the multi-query snapshot lab.
 - [x] Phantom reads — guided example and correction documented; independent teach-back still pending.
-- [x] Snapshot Isolation and write skew — core scenario introduced; SERIALIZABLE/SSI and two-session SQL lab documented; independent teach-back and hands-on lab pending.
+- [x] Snapshot Isolation and write skew — guided read-set/write-set teach-back completed.
+- [x] SSI fundamentals — predicate tracking versus blocking locks and the two read-write anti-dependencies explained; deeper dangerous-structure review and hands-on SQL lab pending.
 
 ## Status
 
