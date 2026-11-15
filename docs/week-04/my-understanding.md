@@ -503,3 +503,36 @@ A snapshot is not a separate copied table or a physically frozen database. Postg
 - [ ] Explain the configuration path from PostgreSQL default to Spring @Transactional independently.
 - [ ] Reproduce the two-query mixed-snapshot example with two sessions.
 - [ ] Explain when READ COMMITTED versus REPEATABLE READ READ ONLY is appropriate for reporting.
+
+
+### My final snapshot-lifecycle answer
+
+**Date:** 15 November 2026
+
+### My answer
+
+> No query plan which is by default 'READ COMMITED' suddenly don't change while 2 queries are running unless or until we explicitly change them 
+> and hence T2 will see updated data from T1
+
+### What I understood correctly
+
+- Query 1 keeps the snapshot that was established when that statement started. If T1 commits while Query 1 is still running, Query 1 does not switch to the new snapshot halfway through.
+- Query 2 starts later under the same READ COMMITTED transaction. It automatically gets a new statement snapshot.
+- If T1 committed before Query 2 started, Query 2 can see T1's committed change.
+- The isolation level did not change between the statements. It remained READ COMMITTED.
+
+### Terminology correction
+
+I used the phrase "query plan" here. The accurate term is **transaction isolation level**. A query plan is PostgreSQL's execution strategy for a SQL statement; it is not the setting that decides snapshot visibility.
+
+### Corrected explanation in simple English
+
+**The transaction continues using READ COMMITTED. Query 1 uses its own snapshot from the time it started and does not change that snapshot while running. Query 2 gets a fresh snapshot when it starts, so it can see commits that happened before Query 2 began.**
+
+### Learning status
+
+- [x] Explain why one READ COMMITTED statement does not switch snapshots while it is executing.
+- [x] Explain why a later statement can see a commit made after the earlier statement started.
+- [ ] Explain the configuration path from PostgreSQL defaults to Spring @Transactional independently.
+- [ ] Reproduce the two-query mixed-snapshot example with two database sessions.
+- [ ] Explain when READ COMMITTED versus REPEATABLE READ READ ONLY is appropriate for reporting.
