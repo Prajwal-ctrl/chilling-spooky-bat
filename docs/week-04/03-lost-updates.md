@@ -145,6 +145,68 @@ In production code, distinguish these outcomes where necessary, and keep the sou
 
 Choose the strategy based on the whole business operation, isolation level, contention pattern, and required invariants.
 
+## Read-modify-write and stale values
+
+Many application operations follow a **read-modify-write** pattern:
+
+1. **Read:** fetch the current value from the database.
+2. **Modify:** calculate a new value in application code, often in a Java variable or entity.
+3. **Write:** send that calculated value back to the database.
+
+Example in a Spring service:
+
+```java
+Account account = accountRepository.findById(accountId).orElseThrow();
+
+BigDecimal newBalance = account.getBalance().subtract(amount);
+
+account.setBalance(newBalance);
+accountRepository.save(account);
+```
+
+The value returned by the initial database read is now held in the Java application. A later commit from another transaction does not automatically refresh that local variable or managed entity.
+
+### What is a stale read/value?
+
+A value is stale when it was correct at the time it was read but another transaction has changed the database value before the application uses the old value to make a later decision or write.
+
+In our example:
+
+- T2 reads ₹20,000 from PostgreSQL.
+- T2 keeps ₹20,000 in its Java variable.
+- T1 changes the database balance to ₹15,000 and commits.
+- T2 still has ₹20,000 in its local variable and may calculate ₹18,000.
+
+T2 did read from the database originally. The issue is not that it read only from Java. The issue is that the Java copy is not automatically refreshed when another transaction commits.
+
+A stale read/value is not the same as a dirty read:
+
+- **Dirty read:** reading another transaction's uncommitted change.
+- **Stale read/value:** using an older value that has since been superseded by a committed change.
+
+### Worked exercise — ₹20,000 starting balance
+
+- T1 withdraws ₹5,000.
+- T2 withdraws ₹2,000.
+- Both read ₹20,000 before either writes.
+
+| Step | T1 | T2 |
+|---|---|---|
+| 1. Read | ₹20,000 | ₹20,000 |
+| 2. Calculate | ₹15,000 | ₹18,000 |
+| 3. Write | Writes ₹15,000 | |
+| 4. Write | | Writes its stale absolute value ₹18,000 |
+
+**Expected balance if both withdrawals succeed:** ₹20,000 − ₹5,000 − ₹2,000 = **₹13,000**.
+
+**Actual balance in the illustrated write order:** **₹18,000**.
+
+The later absolute-value write overwrites the earlier withdrawal's effect.
+
+### Key distinction
+
+A **stale value** is the outdated input held by the application. A **lost update** is the incorrect outcome when a later write based on that stale value overwrites an earlier change.
+
 ## Planned experiment
 
 Use two Java threads and synchronization barriers so both transactions read the same initial balance before either performs its write. Capture the final database state and explain the exact interleaving. Then compare the absolute-value update with the database-side arithmetic update.
