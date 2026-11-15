@@ -98,6 +98,7 @@ Read the concept files in numerical order. The order follows the problem-solving
 | 6a | [READ COMMITTED vs REPEATABLE READ](06a-read-committed-vs-repeatable-read.md) | Work through statement snapshots, stable transaction snapshots, serialization failures, and snapshot timing in PostgreSQL. |
 | 6b | [Phantom reads](06b-phantom-reads.md) | Distinguish phantom reads from non-repeatable reads and compare PostgreSQL READ COMMITTED with REPEATABLE READ. |
 | 6c | [Snapshot Isolation and write skew](06c-snapshot-isolation-and-write-skew.md) | Understand the limits of REPEATABLE READ, disjoint write sets, serialization anomalies, SERIALIZABLE, and PostgreSQL SSI. |
+| 6d | [Isolation configuration and snapshot lifecycle](06d-isolation-configuration-and-snapshot-lifecycle.md) | Learn PostgreSQL defaults, Spring isolation configuration, statement versus transaction snapshots, and why one READ COMMITTED query never changes snapshots mid-execution. |
 | 7 | [Pessimistic locking](07-pessimistic-locking.md) | Study the first explicit write-coordination solution: lock the account row before changing it. |
 | 8 | [Deadlocks and lock ordering](08-deadlocks-and-lock-ordering.md) | Understand a new problem that can arise when transactions hold multiple locks, and how consistent ordering reduces avoidable deadlocks. |
 | 9 | [Optimistic locking](09-optimistic-locking.md) | Compare a different strategy based on version checks. It is not automatically a better form of pessimistic locking; it can be preferable when conflicts are relatively uncommon. |
