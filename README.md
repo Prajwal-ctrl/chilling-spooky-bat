@@ -993,3 +993,5 @@ As each week begins, its folder and topic notes will be added. Implementation we
 - [ ] Remaining roadmap weeks completed incrementally.
 
 **Current working focus:** Week 4 — understand concurrency deeply, then implement and verify PAY-006 in Week 5.
+
+<!-- dummy README commit: documentation activity marker -->
